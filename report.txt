@@ -1,0 +1,213 @@
+Assignment 1
+
+Code: 
+#include <stdio.h>
+
+int main() {
+    int a = 42;
+    char b = 'G';
+    double c = 3.14;
+    short d = 3;
+
+    printf("Size of int: %zu bytes\n", sizeof(a));
+    printf("Address of int: %p\n", (void *)&a);
+
+    printf("Size of char: %zu byte\n", sizeof(b));
+    printf("Address of char: %p\n", (void *)&b);
+
+    printf("Size of double: %zu bytes\n", sizeof(c));
+    printf("Address of double: %p\n", (void *)&c);
+
+    printf("Size of short: %zu bytes\n", sizeof(d));
+    printf("Address of short: %p\n", (void *)&d);
+
+    return 0;
+}
+
+Output: 
+Size of int: 4 bytes
+Address of int: 0x7ffe51e01ddc
+Size of char: 1 byte
+Address of char: 0x7ffe51e01dd9
+Size of double: 8 bytes
+Address of double: 0x7ffe51e01de0
+Size of short: 2 bytes
+Address of short: 0x7ffe51e01dda
+
+Explanation:
+After compiling and running the program, I found that int occupies 4 bytes, char occupies 1 byte, double occupies 8 bytes, and short occupies 2 bytes. 
+The addresses showed that the variables were not stored in the order in which they were declared. The addresses did not necessarily follow the order in which the variables were declared, since the compiler determines how local variables are arranged in memory. 
+The addresses also demonstrate alignment. The address of short is divisible by 2, the address of int is divisible by 4, and the address of double is divisible by 8. This means that these variables are stored at addresses aligned to their respective sizes. The char variable occupies one byte and does not require a larger alignment boundary.
+
+
+Assignment 2
+
+Code: 
+#include <stdio.h>
+
+struct Original {
+    char a;
+    int b;
+    double c;
+};
+
+struct Reordered {
+    double c;
+    int b;
+    char a;
+};
+
+int main() {
+    struct Original first;
+    struct Reordered second;
+
+    printf("Original struct:\n");
+    printf("Size of struct: %zu bytes\n", sizeof(first));
+    printf("Address of a: %p\n", (void *)&first.a);
+    printf("Address of b: %p\n", (void *)&first.b);
+    printf("Address of c: %p\n", (void *)&first.c);
+
+    printf("\nReordered struct:\n");
+    printf("Size of struct: %zu bytes\n", sizeof(second));
+    printf("Address of c: %p\n", (void *)&second.c);
+    printf("Address of b: %p\n", (void *)&second.b);
+    printf("Address of a: %p\n", (void *)&second.a);
+
+    return 0;
+}
+
+Output: 
+Original struct:
+Size of struct: 16 bytes
+Address of a: 0x7ffeb9720b00
+Address of b: 0x7ffeb9720b04
+Address of c: 0x7ffeb9720b08
+
+Reordered struct:
+Size of struct: 16 bytes
+Address of c: 0x7ffeb9720b10
+Address of b: 0x7ffeb9720b18
+Address of a: 0x7ffeb9720b1c
+
+Explanation: 
+After compiling and running the program, I found that both the original and reordered structs occupy 16 bytes.
+In the original struct, char a is stored at 0x7ffeb9720b00, int b at 0x7ffeb9720b04, and double c at 0x7ffeb9720b08. Since char occupies 1 byte and int requires 4-byte alignment on this system, 3 bytes of padding are added between a and b. The double field starts at an address aligned to 8 bytes, so no additional padding is needed between b and c.
+The drawing below represents the memory layout of the original struct. Each box represents one byte of memory, and the dots represent padding bytes.
+a        b       c
+[ |.|.|.][ | | | ][ | | | | | | | ] 
+In the reordered struct, double c is stored at 0x7ffeb9720b10, int b at 0x7ffeb9720b18, and char a at 0x7ffeb9720b1c. The double starts at an address aligned to 8 bytes, and the int starts at an address aligned to 4 bytes. Since a only requires 1-byte alignment, no padding is needed between the fields. However, 3 bytes of padding are added at the end of the struct so that its total size is a multiple of 8 bytes.
+The drawing below represents the reordered struct. The padding is now at the end instead of between the fields.
+c               b       c
+[ | | | | | | | ][ | | | ][ |.|.|.]
+Changing the order of the fields did not reduce the total size in this case. Both structs occupy 16 bytes, but the padding is placed differently.
+Padding is used because the processor and the system's data alignment rules work most efficiently when values are stored at suitably aligned memory addresses. The compiler inserts padding when necessary to satisfy these alignment requirements. It also ensures that the struct's total size is a multiple of its alignment, so that the members of an array of such structs remain properly aligned. 
+
+
+Assignment 3
+
+Code: 
+#include <stdio.h>
+
+struct NormalStruct {
+    char a;
+    int b;
+    double c;
+};
+
+#pragma pack(1)
+struct PackedStruct1 {
+    char a;
+    int b;
+    double c;
+};
+
+#pragma pack(2)
+struct PackedStruct2 {
+    char a;
+    int b;
+    double c;
+};
+
+#pragma pack(4)
+struct PackedStruct4 {
+    char a;
+    int b;
+    double c;
+};
+
+int main() {
+    struct NormalStruct normal;
+    struct PackedStruct1 packed1;
+    struct PackedStruct2 packed2;
+    struct PackedStruct4 packed4;
+
+    printf("Normal struct:\n");
+    printf("Size: %lu bytes\n", sizeof(normal));
+    printf("Address of a: %p\n", (void *)&normal.a);
+    printf("Address of b: %p\n", (void *)&normal.b);
+    printf("Address of c: %p\n\n", (void *)&normal.c);
+
+    printf("Packed struct (pack 1):\n");
+    printf("Size: %lu bytes\n", sizeof(packed1));
+    printf("Address of a: %p\n", (void *)&packed1.a);
+    printf("Address of b: %p\n", (void *)&packed1.b);
+    printf("Address of c: %p\n\n", (void *)&packed1.c);
+
+    printf("Packed struct (pack 2):\n");
+    printf("Size: %lu bytes\n", sizeof(packed2));
+    printf("Address of a: %p\n", (void *)&packed2.a);
+    printf("Address of b: %p\n", (void *)&packed2.b);
+    printf("Address of c: %p\n\n", (void *)&packed2.c);
+
+    printf("Packed struct (pack 4):\n");
+    printf("Size: %lu bytes\n", sizeof(packed4));
+    printf("Address of a: %p\n", (void *)&packed4.a);
+    printf("Address of b: %p\n", (void *)&packed4.b);
+    printf("Address of c: %p\n", (void *)&packed4.c);
+
+    return 0;
+}
+
+Output:
+Normal struct:
+Size: 16 bytes
+Address of a: 0x7fff7f3a85d0
+Address of b: 0x7fff7f3a85d4
+Address of c: 0x7fff7f3a85d8
+
+Packed struct (pack 1):
+Size: 13 bytes
+Address of a: 0x7fff7f3a85b5
+Address of b: 0x7fff7f3a85b6
+Address of c: 0x7fff7f3a85ba
+
+Packed struct (pack 2):
+Size: 14 bytes
+Address of a: 0x7fff7f3a85c2
+Address of b: 0x7fff7f3a85c4
+Address of c: 0x7fff7f3a85c8
+
+Packed struct (pack 4):
+Size: 16 bytes
+Address of a: 0x7fff7f3a85e0
+Address of b: 0x7fff7f3a85e4
+Address of c: 0x7fff7f3a85e8
+
+Explanation: 
+I wrote a few struct definitions into one so that we can compare the outputs directly in 1 execution.
+After compiling and running the program, I found that the normal struct and the struct using #pragma pack(4) occupy 16 bytes, while #pragma pack(1) reduces the size to 13 bytes and #pragma pack(2) reduces it to 14 bytes.
+In the normal struct, char a is stored at 0x7fff7f3a85d0, int b at 0x7fff7f3a85d4, and double c at 0x7fff7f3a85d8. Since char occupies 1 byte and int requires 4-byte alignment on this system, 3 bytes of padding are inserted between a and b. The double field starts at an address aligned to 8 bytes.
+Normal struct (16 bytes)
+a        b       c
+[ |.|.|.][ | | | ][ | | | | | | | ] 
+With #pragma pack(1), the struct occupies only 13 bytes. The address of a is 0x7fff7f3a85b5, b is at 0x7fff7f3a85b6, and c is at 0x7fff7f3a85ba. The fields are stored directly next to each other without padding, so the total size is 1 + 4 + 8 = 13 bytes.
+#pragma pack(1) — 13 bytes
+a   b       c
+[ ][ | | | ][ | | | | | | | ] 
+With #pragma pack(2), the struct occupies 14 bytes. The address of a is 0x7fff7f3a85c2, b is at 0x7fff7f3a85c4, and c is at 0x7fff7f3a85c8. One byte of padding is inserted after a so that b starts at a 2-byte-aligned address. No additional padding is needed before c because its address is also aligned to 2 bytes.
+#pragma pack(2) — 14 bytes
+a    b       c
+[ |.][ | | | ][ | | | | | | | ] 
+With #pragma pack(4), the struct occupies 16 bytes. The address of a is 0x7fff7f3a85e0, b is at 0x7fff7f3a85e4, and c is at 0x7fff7f3a85e8. The compiler aligns b to a 4-byte boundary and c to an 8-byte boundary, resulting in the same layout as the normal struct.
+Changing the packing value affects how much padding is inserted and therefore changes the total size of the struct. Smaller packing values can reduce memory usage, but they may also lead to less efficient memory access because some fields are not naturally aligned. 
+
